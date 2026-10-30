@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evaluasi Pembelajaran TKA Bahasa Indonesia SMA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f5f7fa;color:#202124}
+header{background:#0d47a1;color:#fff;padding:24px 16px;text-align:center}
+header h1{font-size:1.3rem;margin-bottom:6px}
+header p{font-size:.9rem;opacity:.9}
+main{max-width:860px;margin:0 auto;padding:16px 16px 48px}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;margin-bottom:16px}
+h2{font-size:1.05rem;color:#0d47a1;margin-bottom:12px;border-left:4px solid #1a73e8;padding-left:8px}
+h3{font-size:.95rem;color:#1a73e8;margin:18px 0 8px}
+.petunjuk{background:#e8f0fe;border-radius:8px;padding:12px;font-size:.9rem;margin-bottom:16px}
+.soal{padding:12px 0;border-bottom:1px solid #eee}
+.soal:last-child{border-bottom:0}
+.soal p{font-weight:500;margin-bottom:8px}
+.skala{display:flex;gap:6px;flex-wrap:wrap}
+.skala label{flex:1 1 0;min-width:52px;text-align:center;border:1px solid #dadce0;border-radius:8px;padding:8px 4px;font-size:.8rem;cursor:pointer;transition:.15s;background:#fff}
+.skala label:hover{border-color:#1a73e8;background:#f0f6ff}
+.skala input{display:none}
+.skala label:has(input:checked){background:#1a73e8;border-color:#1a73e8;color:#fff}
+.skala label:has(input:checked) span{color:#fff}
+.skala small{display:block;font-size:.7rem;opacity:.85}
+textarea{width:100%;border:1px solid #dadce0;border-radius:8px;padding:10px;font:inherit;resize:vertical;min-height:80px}
+textarea:focus{outline:2px solid #1a73e8;border-color:transparent}
+input[type=text]{width:100%;border:1px solid #dadce0;border-radius:8px;padding:10px;font:inherit;margin-bottom:10px}
+input:focus{outline:2px solid #1a73e8;border-color:transparent}
+.btn{display:block;width:100%;background:#1a73e8;color:#fff;border:0;padding:14px;border-radius:24px;font:600 1rem inherit;cursor:pointer;margin-top:16px}
+.btn:hover{background:#0d47a1}
+.btn:disabled{background:#9aa0a6;cursor:not-allowed}
+.msg{display:none;padding:12px;border-radius:8px;margin-top:12px;font-size:.9rem}
+.msg.ok{display:block;background:#e6f4ea;color:#137333}
+.msg.err{display:block;background:#fce8e6;color:#c5221f}
+footer{text-align:center;font-size:.8rem;color:#5f6368;padding:16px}
+@media(max-width:600px){header h1{font-size:1.1rem}.card{padding:16px}.skala label{min-width:44px;font-size:.75rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Evaluasi Pembelajaran TKA Bahasa Indonesia SMA</h1>
+  <p>20 soal skala Likert · 5 pertanyaan refleksi</p>
+</header>
+
+<main>
+<form id="formEvaluasi">
+
+  <section class="card">
+    <h2>Identitas (opsional)</h2>
+    <input type="text" id="nama" placeholder="Nama / Inisial">
+    <input type="text" id="kelas" placeholder="Kelas (mis. XII IPA 1)">
+    <div class="petunjuk"><strong>Petunjuk:</strong> Skala 1–5 (1 = Sangat Tidak Setuju, 5 = Sangat Setuju). Soal bertanda ★ wajib diisi.</div>
+  </section>
+
+  <section class="card">
+    <h2>A. Skala Likert (20 soal)</h2>
+    <h3>Dimensi 1 — Kualitas Pengajaran Guru</h3>
+    <div id="dim1"></div>
+    <h3>Dimensi 2 — Pemahaman Siswa terhadap Materi TKA</h3>
+    <div id="dim2"></div>
+    <h3>Dimensi 3 — Keberhasilan Mengerjakan Soal TKA via GForm</h3>
+    <div id="dim3"></div>
+    <h3>Dimensi 4 — Kepercayaan Diri & Kesiapan TKA</h3>
+    <div id="dim4"></div>
+  </section>
+
+  <section class="card">
+    <h2>B. Refleksi Terbuka (5 pertanyaan)</h2>
+    <div id="refleksi"></div>
+  </section>
+
+  <section class="card">
+    <button type="submit" class="btn" id="btnKirim">Kirim Jawaban</button>
+    <div class="msg" id="msg"></div>
+  </section>
+
+</form>
+</main>
+
+<footer>&copy; 2026 Evaluasi TKA Bahasa Indonesia SMA</footer>
+
+<script>
+/* ====== URL WEB APP APPS SCRIPT (sudah diisi) ====== */
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzZLPZByaotPzSyE-0DWwXGcO7VuBMEzAOnlFVm789A2LZ3L7D-F1P6jPwjsqs8-lYg/exec";
+
+/* ====== DATA SOAL ====== */
+const SOAL = {
+  dim1: [
+    "Guru menjelaskan strategi membaca untuk soal TKA (ide pokok, makna tersirat) dengan jelas dan mudah dipahami.",
+    "Guru menggunakan contoh teks atau soal yang mirip dengan soal TKA dalam latihan di kelas.",
+    "Guru mengajarkan cara menilai keakuratan informasi dan argumen penulis (evaluasi & apresiasi).",
+    "Guru memberikan bimbingan yang cukup untuk jenis soal yang sering salah (makna konotatif, inferensi tersirat).",
+    "Guru memberikan umpan balik yang membangun setelah siswa mengerjakan latihan soal.",
+    "Guru menyampaikan materi dengan cara yang menarik dan tidak membosankan."
+  ],
+  dim2: [
+    "Saya dapat dengan cepat menemukan informasi yang tertulis langsung dalam teks (pemahaman tekstual).",
+    "Saya mampu menyimpulkan maksud tersirat atau pesan penulis dalam teks.",
+    "Saya memahami perbedaan antara fakta dan opini dalam teks.",
+    "Saya mampu mengidentifikasi struktur dan kaidah kebahasaan teks yang diujikan.",
+    "Saya merasa kesulitan ketika menghadapi soal \"apa maksud penulis\" atau \"prediksi akhir cerita\". (negatif)",
+    "Saya mampu mengevaluasi keakuratan argumen atau bukti yang disajikan penulis."
+  ],
+  dim3: [
+    "Saya dapat menyelesaikan soal TKA di GForm dengan tepat waktu.",
+    "Nilai latihan TKA saya di GForm meningkat dibanding latihan sebelumnya.",
+    "Saya merasa antusias mengerjakan soal TKA melalui GForm.",
+    "Tampilan dan petunjuk soal di GForm mudah dipahami sehingga tidak mengganggu konsentrasi saya.",
+    "Saya sering melakukan kesalahan pada soal inferensial (simpulan tersirat) saat mengerjakan TKA di GForm. (negatif)"
+  ],
+  dim4: [
+    "Setelah latihan di kelas, kepercayaan diri saya dalam mengerjakan soal TKA meningkat.",
+    "Saya merasa siap menghadapi TKA bahasa Indonesia setelah mengikuti pembelajaran guru.",
+    "Saya akan merekomendasikan cara guru mengajar TKA kepada teman kelas lain."
+  ]
+};
+
+const REFLEKSI = [
+  "Strategi belajar apa yang paling membantu kamu dalam mengerjakan soal TKA bahasa Indonesia? Jelaskan alasannya.",
+  "Jenis soal TKA bahasa Indonesia apa yang masih paling sulit kamu kerjakan (ide pokok, simpulan tersirat, evaluasi argumen)? Mengapa?",
+  "Bagian mana dari cara guru mengajar yang paling membantu pemahamanmu? Adakah hal yang perlu diperbaiki?",
+  "Bagaimana pengalamanmu mengerjakan soal TKA melalui GForm? Apa kendala yang kamu hadapi (waktu, tampilan, jaringan)?",
+  "Apa harapan atau saranmu untuk pembelajaran TKA bahasa Indonesia ke depan agar kamu lebih siap dan percaya diri?"
+];
+
+/* ====== RENDER SOAL ====== */
+let noGlobal = 0;
+const LABEL = ["STS","TS","N","S","SS"];
+
+function renderSkala(containerId, arr){
+  const box = document.getElementById(containerId);
+  arr.forEach(txt => {
+    noGlobal++;
+    const div = document.createElement("div");
+    div.className = "soal";
+    let skala = "";
+    for(let i=1;i<=5;i++){
+      skala += `<label><input type="radio" name="q${noGlobal}" value="${i}" required><span>${i}</span><small>${LABEL[i-1]}</small></label>`;
+    }
+    div.innerHTML = `<p>${noGlobal}. ${txt} <span style="color:#c5221f">★</span></p><div class="skala">${skala}</div>`;
+    box.appendChild(div);
+  });
+}
+renderSkala("dim1", SOAL.dim1);
+renderSkala("dim2", SOAL.dim2);
+renderSkala("dim3", SOAL.dim3);
+renderSkala("dim4", SOAL.dim4);
+
+/* ====== RENDER REFLEKSI ====== */
+const boxRef = document.getElementById("refleksi");
+REFLEKSI.forEach((txt,i)=>{
+  const div = document.createElement("div");
+  div.className = "soal";
+  div.innerHTML = `<p>Refleksi ${i+1}. ${txt} <span style="color:#c5221f">★</span></p>
+    <textarea name="r${i+1}" required placeholder="Tulis jawabanmu…"></textarea>`;
+  boxRef.appendChild(div);
+});
+
+/* ====== SUBMIT ====== */
+document.getElementById("formEvaluasi").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const btn = document.getElementById("btnKirim");
+  const msg = document.getElementById("msg");
+  btn.disabled = true; btn.textContent = "Mengirim…";
+  msg.className = "msg"; msg.textContent = "";
+
+  const data = {
+    nama: document.getElementById("nama").value.trim(),
+    kelas: document.getElementById("kelas").value.trim(),
+    jawaban: {},
+    refleksi: {}
+  };
+  for(let i=1;i<=20;i++){
+    const v = document.querySelector(`input[name="q${i}"]:checked`);
+    if(!v){ msg.className="msg err"; msg.textContent="Masih ada soal Likert yang belum dijawab."; btn.disabled=false; btn.textContent="Kirim Jawaban"; return; }
+    data.jawaban["q"+i] = Number(v.value);
+  }
+  for(let i=1;i<=5;i++){
+    const v = document.querySelector(`textarea[name="r${i}"]`).value.trim();
+    if(!v){ msg.className="msg err"; msg.textContent="Masih ada pertanyaan refleksi yang belum dijawab."; btn.disabled=false; btn.textContent="Kirim Jawaban"; return; }
+    data.refleksi["r"+i] = v;
+  }
+
+  try{
+    const res = await fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify(data)
+    });
+    const out = await res.json();
+    if(out.status === "ok"){
+      msg.className = "msg ok";
+      msg.textContent = "✅ Jawaban berhasil dikirim dan tersimpan. Terima kasih!";
+      this.reset();
+      window.scrollTo({top:0,behavior:"smooth"});
+    } else {
+      throw new Error(out.message || "Gagal menyimpan");
+    }
+  }catch(err){
+    msg.className = "msg err";
+    msg.textContent = "❌ Gagal mengirim: " + err.message + ". Periksa koneksi atau hubungi guru.";
+  }finally{
+    btn.disabled = false; btn.textContent = "Kirim Jawaban";
+  }
+});
+</script>
+
+</body>
+</html>
